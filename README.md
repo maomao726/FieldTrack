@@ -40,7 +40,7 @@ $ python setup.py develop
 
 * (optional) Keypoints Detector
 
-    The file size is too large, so DM me if you need a pretrained weights on football data, or train your own weights with my another repository [football_extension]("https://github.com/maomao726/football_extension.git")
+    The file size is too large, so DM me if you need a pretrained weights on football data, or train your own weights with my another repository [football_extension](https://github.com/maomao726/football_extension.git)
 
 # Usage
 ```bash

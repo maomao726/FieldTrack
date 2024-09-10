@@ -32,11 +32,11 @@ $ python setup.py develop
 # Pretrained Weight
 * YOLOX
 
-    You can download pretrained yolox weight from [OC-SORT]("https://github.com/noahcao/OC_SORT.git") and put them in `FieldTrack/pretrained`.
+    You can download pretrained yolox weight from [OC-SORT](https://github.com/noahcao/OC_SORT.git) and put them in `FieldTrack/pretrained`.
 
 * torchreid
 
-    You can download pretrained reid weight from [Deep OC-SORT]("https://github.com/GerardMaggiolino/Deep-OC-SORT.git") and put them in `FieldTrack/external/weights/`.
+    You can download pretrained reid weight from [Deep OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT.git) and put them in `FieldTrack/external/weights/`.
 
 * (optional) Keypoints Detector
 

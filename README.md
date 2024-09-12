@@ -32,15 +32,15 @@ $ python setup.py develop
 # Pretrained Weight
 * YOLOX
 
-    You can download pretrained yolox weight from [OC-SORT]("https://github.com/noahcao/OC_SORT.git") and put them in `FieldTrack/pretrained`.
+    You can download pretrained yolox weight from [OC-SORT](https://github.com/noahcao/OC_SORT.git) and put them in `FieldTrack/pretrained`.
 
 * torchreid
 
-    You can download pretrained reid weight from [Deep OC-SORT]("https://github.com/GerardMaggiolino/Deep-OC-SORT.git") and put them in `FieldTrack/external/weights/`.
+    You can download pretrained reid weight from [Deep OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT.git) and put them in `FieldTrack/external/weights/`.
 
 * (optional) Keypoints Detector
 
-    The file size is too large, so DM me if you need a pretrained weights on football data, or train your own weights with my another repository [football_extension]("https://github.com/maomao726/football_extension.git")
+    The file size is too large, so DM me if you need a pretrained weights on football data, or train your own weights with my another repository [football_extension](https://github.com/maomao726/football_extension.git)
 
 # Usage
 ```bash

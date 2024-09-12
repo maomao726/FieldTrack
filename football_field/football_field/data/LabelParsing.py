@@ -43,15 +43,15 @@ class RawVideoLabelParser():
             logger.info('[RawVideoLabelParser] : Keypoint is loaded. Total Length: %d. Num of ref_points: %d'%(self.num_cam, self.num_keypt))
         
         ## load homography matrix label
-        # homo_path = os.path.join(raw_path, "labels/homography_matrix_2D_to_2D.json")
-        # if not os.path.exists(homo_path):
-        #     logger.warning("homography_matrix_2D_to_2D is not exist.\n\
-        #                     If you're training or evaluating, please make sure you've run \"to_2d_homography.py\".")
-        # else:
-        #     homo_fp = open(homo_path, 'r')
-        #     self.homo_labels = json.load(homo_fp)
-        #     logger.info('[RawVideoLabelParser] : homography matrix are loaded, Len : %d, Cam : %d, each length : %d' \
-        #         %(len(self.homo_labels), len(self.homo_labels['0']), len(self.homo_labels['0'])))
+        homo_path = os.path.join(raw_path, "labels/homography_matrix_2D_to_2D.json")
+        if not os.path.exists(homo_path):
+            logger.warning("homography_matrix_2D_to_2D is not exist.\n\
+                            If you're training or evaluating, please make sure you've run \"to_2d_homography.py\".")
+        else:
+            homo_fp = open(homo_path, 'r')
+            self.homo_labels = json.load(homo_fp)
+            logger.info('[RawVideoLabelParser] : homography matrix are loaded, Len : %d, Cam : %d, each length : %d' \
+                %(len(self.homo_labels), len(self.homo_labels['0']), len(self.homo_labels['0'])))
         
         
 
@@ -65,7 +65,7 @@ class RawVideoLabelParser():
                 ndarray, shape: 3x3x4
         '''
         assert fidx < self.frame_length, "index %d is out of the bound, which is %d "%(fidx, self.frame_length)
-        res = self.annotations[str(fidx)]['projection_matrix']["cam%d" % cidx].reshape(3, 4)
+        res = np.array(self.annotations[str(fidx)]['projection_matrix']["cam%d" % cidx], dtype=np.float32).reshape(3, 4)
         return res
     
     def getHomographyMatrix(self, cidx, fidx):
@@ -90,15 +90,21 @@ class RawVideoLabelParser():
                 (ndarray - shape: 22x3 , ndarray - shape 22x1)
         '''
         players_pos_global = []
+
         proj_mat = self.getProjectionMatrix(cidx, fidx)
+
         assert fidx < self.frame_length, "index %d is out of the bound, which is %d "%(fidx, self.frame_length)
         for _, player_pos in self.annotations[str(fidx)]['player_position'].items() :
-            players_pos_global.append(np.array([player_pos[0], player_pos[2], 0, 1], dtype=np.float32))
+            players_pos_global.append(np.array([player_pos[0], player_pos[1], 0, 1], dtype=np.float32))
+
+        
             
         players_pos_global = np.stack(players_pos_global, axis = 0)
-        
+
         players_pos_image = (proj_mat @ players_pos_global.T).T
         players_pos_image /= players_pos_image[:, 2:]
+
+
         
         ## debug
         # img = cv2.imread("/media/hcchen/data/data/dataset_.98/frames/cam_%d/cam%d_%05d.png"%(cidx, cidx, fidx))

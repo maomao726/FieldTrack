@@ -141,8 +141,9 @@ class FieldRegister_AfterTrack:
         result["warpped"] = warpped
 
         #Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
-        pred_to_field = [None for _ in pred_result]
+        pred_to_field = None
         if pred_result is not None:
+            pred_to_field = [None for _ in pred_result]
             # scale
             detections = pred_result[0][:, :4]
             

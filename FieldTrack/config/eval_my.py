@@ -33,7 +33,7 @@ class Args:
         self.app_embed_alpha = 0.33
         
         self.demo_type = "image"
-        self.path = "/media/hcchen/data/data/football_data/videoData/motions/slow" #The video set to be processed
+        self.path = "/media/hcchen/data/data/football_data/videoData/motions/slowest"
         self.save_result = True
         self.save_frames = False
         self.aspect_ratio_thresh = 1.6
@@ -42,7 +42,7 @@ class Args:
         # for field detection
         self.field_pretrained = "/media/hcchen/data/FieldTrack/football_field/football_field/best.pth"
         self.field_input_size = (256, 256)
-        self.raw_video_path = "/media/hcchen/data/data/football_data/maincam_momentum" # The raw data path, which is used to obtain ground truth
+        self.raw_video_path = "/media/hcchen/data/data/football_data/maincam_momentum"
 
     
         

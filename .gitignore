@@ -10,3 +10,5 @@ football_field/football_field.egg-info
 football_field/football_field/best.pth
 motmetrics/motmetrics.egg-info
 
+Test_warpped.py
+*.pth

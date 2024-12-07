@@ -65,7 +65,7 @@ def imageflow_eval(predictor, vis_folder, current_time, args):
         return
     
     register = FieldRegister(args.field_pretrained, args.field_input_size, args.device)  
-    gtparser = GroundTruthParser(args.raw_video_path, args.path)
+    gtparser = GroundTruthParser(args.raw_video_path, os.path.join(args.path))
     mot_acc = mm.MOTAccumulator(auto_id=False)
     mh = mm.metrics.create()
     summaries = None
@@ -92,39 +92,30 @@ def imageflow_eval(predictor, vis_folder, current_time, args):
             cap = cv2.VideoCapture(video)
             video_len = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         elif args.demo_type == "image":
-            frame_list = sorted(os.listdir(video))
+            frame_list = sorted([i for i in os.listdir(video) if osp.splitext(i)[-1].lower() in IMAGE_EXT])
             video_len = len(frame_list)
-            #print(frame_list)
+
     
         logger.info(f"Processing video: {video_basename}")
         timer = Timer()
 
         ## detection cache
-        cache_path = osp.join(cache_root, f"{video_basename.split('.')[0]}.pkl")
-        if(not osp.exists(cache_path)):
-            det_res = []
-        else:
-            with open(cache_path, 'rb') as f:
-                det_res = pickle.load(f)
-            f.close()
         results = []
         
         for frame_id in range(video_len):
-            if args.demo_type == "video":
-                _, frame = cap.read()
-            elif args.demo_type == "image":
-                frame = cv2.imread(osp.join(video, frame_list[frame_id]))
+            frame_path = osp.join(video, frame_list[frame_id])
+            frame = cv2.imread(frame_path)
+
+            outputs, _ = predictor.inference(frame, timer, frame_path)
             
-            cache_file = osp.join(cache_path, f"{frame_id}.pkl")
+            outputs, reg_res = register.inference(frame, outputs)
+            # for p in outputs[0]:
+            #     cv2.circle(reg_res['warpped'], (int(p[1]), int(p[0])), 5, (0, 255, 0), -1)
+            # cv2.imshow("frame", reg_res['warpped'])
+            # print(outputs)
+            # cv2.waitKey(0)
+            #det_res.append([output.detach().cpu().numpy() for output in outputs])
             
-            if len(det_res) <= frame_id:
-                outputs, _ = predictor.inference(frame, timer)
-                outputs, reg_res = register.inference(frame, outputs, predictor.test_size)
-                det_res.append([output.detach().cpu().numpy() for output in outputs])
-            else:
-                #outputs_c, _ = predictor.inference(frame, timer)
-                outputs= det_res[frame_id]
-                #print(outputs)
                 
             #outputs, _ = predictor.inference(frame, timer)
             
@@ -142,7 +133,7 @@ def imageflow_eval(predictor, vis_folder, current_time, args):
             # cv2.imwrite("field_debug.jpg", field_debug)
             # breakpoint()
             
-            online_targets = tracker.update(outputs, frame, register.field_size)
+            online_targets = tracker.update(outputs, frame, register.field_size, reg_res['warpped'])
             online_pos = []
             online_ids = []
             
@@ -160,13 +151,20 @@ def imageflow_eval(predictor, vis_folder, current_time, args):
                     f"{frame_id},{tid},{p[0]:.2f},{p[1]:.2f}\n"
                 )
             timer.toc()
-            
+
+
             if args.save_frames:
-                online_im = plot_tracking_field(reg_res['warpped'], online_targets)
+                online_im = reg_res['warpped'].copy()
+                #online_im = plot_tracking_field(reg_res['warpped'], online_targets)
                 save_folder = osp.join(vis_folder, video_basename.split('.')[0])
                 if not osp.exists(save_folder):
                     os.makedirs(save_folder, exist_ok=True)
                 cv2.imwrite(osp.join(save_folder, f"{frame_id}.jpg"), online_im)
+
+                if args.show_frame:
+                    cv2.imshow("ori", frame)
+                    cv2.imshow("online", online_im)
+                    cv2.waitKey(10)
 
             frame_id += 1 
     
@@ -252,7 +250,7 @@ def main(exp, args):
     trt_file = None
     decoder = None
 
-    predictor = Predictor(model, exp, trt_file, decoder, args.device, args.fp16)
+    predictor = Predictor(model, exp, trt_file, decoder, args.device, args.fp16, args.detection_prepared)
     current_time = time.localtime()
     
     return imageflow_eval(predictor, vis_folder, current_time, args)
@@ -279,7 +277,7 @@ if __name__ == "__main__":
     result = main(exp, args)
     if finetuning:
         #_logger.info(f"mota: {result['mota']}")
-        nni.report_final_result(result['idf1'])
+        nni.report_final_result(result['mota'])
     else:
         print("--result--")
         print("data: ", osp.basename(args.path))

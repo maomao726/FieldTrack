@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 
-def mse_batch(poss1, poss2, threshold=20, tolerance=1):
+def mse_batch(poss1, poss2, threshold=20, tolerance=None):
     """
     Computes Distance between two pos in the form [x1,y1]
     """
@@ -12,8 +12,11 @@ def mse_batch(poss1, poss2, threshold=20, tolerance=1):
     xx1 = poss1[..., 0] - poss2[..., 0]
     yy1 = poss1[..., 1] - poss2[..., 1]
     dist = np.sqrt(xx1 ** 2 + yy1 ** 2) # shape: num_det x num_track
+    #breakpoint()
     # The linear rescaling is a naive version and needs more study
-    dist[dist > threshold] = 1e9 # set the distance larger than threshold to inf
+    if tolerance is None or tolerance >= threshold:
+        tolerance = threshold
+    dist[dist > tolerance] = 1e9 # set the distance larger than threshold to inf
     dist = dist / threshold
     dist = 1 - dist # rescale to (0,1)
 
@@ -214,7 +217,7 @@ def linear_assignment(cost_matrix):
     #breakpoint()
     try:
         import lap
-        _, x, y = lap.lapjv(cost_matrix, extend_cost=True)
+        _, x, y = lap.lapjv(cost_matrix, extend_cost=True, cost_limit=1e4)
         return np.array([[y[i],i] for i in x if i >= 0]) #
     except ImportError:
         from scipy.optimize import linear_sum_assignment
@@ -314,7 +317,8 @@ def associate(detections, trackers, det_embs, trk_embs,
             matched_indices = linear_assignment(cost_matrix)
     else:
         matched_indices = np.empty(shape=(0,2))
-
+    if len(matched_indices) < 1:
+        matched_indices = np.empty(shape=(0,2))
     unmatched_detections = []
     for d, det in enumerate(detections):
         if(d not in matched_indices[:,0]):
@@ -389,7 +393,7 @@ def associate_kitti(detections, trackers, det_cates, iou_threshold,
 
     if min(iou_matrix.shape) > 0:
         a = (iou_matrix > iou_threshold).astype(np.int32)
-        if a.sum(1).max() == 1 and a.sum(0).max() == 1:
+        if a.sum(1).max() == 1 and a.sum(0).max() == 1: # only one match for each detection and tracker
             matched_indices = np.stack(np.where(a), axis=1)
         else:
             matched_indices = linear_assignment(cost_matrix)

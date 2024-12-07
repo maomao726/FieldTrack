@@ -6,6 +6,7 @@ from __future__ import print_function
 import numpy as np
 from .embedding import EmbeddingComputer
 from .association import *
+import cv2
 
 
 def k_previous_obs(observations, cur_age, k):
@@ -191,7 +192,7 @@ ASSO_FUNCS = {  "mse": mse_batch,
 
 class OCSort(object):
     def __init__(self, det_thresh, max_age=30, min_hits=3, 
-        dist_threshold=20, mse_tolerence=0.4, delta_t=3, asso_func="mse", inertia=0.7, 
+        dist_threshold=20, mse_tolerence=None, delta_t=3, asso_func="mse", inertia=0.7, 
         use_app_embed=True, weight_app_embed=0.5, app_embed_alpha=0.9,
         use_byte=False):
         """
@@ -222,7 +223,7 @@ class OCSort(object):
 
 
 
-    def update(self, output_results, frame, field_size):
+    def update(self, output_results, frame, field_size, warpped_img):
         """
         Params:
           dets - a numpy array of detections in the format [[x1,y1,x2,y2,score],[x1,y1,x2,y2,score],...]
@@ -230,10 +231,10 @@ class OCSort(object):
         Returns the a similar array, where the last column is the object ID.
         NOTE: The number of objects returned may differ from the number of detections provided.
         """
-        if output_results is None:
+        self.frame_count += 1
+        if output_results is None or output_results[0] is None:
             return np.empty((0, 3))
         
-        self.frame_count += 1
 
         # get detections (position on field, score, bbox on frame)
         if type(output_results[0]) != np.ndarray:
@@ -288,21 +289,27 @@ class OCSort(object):
         k_observations = np.array(
             [k_previous_obs(trk.observations, trk.age, self.delta_t) for trk in self.trackers])
         
-        
+        debug_img = warpped_img.copy()
+
 
         """
             First round of association
         """
         #print(dets.shape, trks.shape, velocities.shape, k_observations.shape)
+        #breakpoint()
         matched, unmatched_dets, unmatched_trks = associate(
             dets, trks, dets_emb, trk_emb, 
             self.dist_threshold, self.mse_tolerence, 
             velocities, k_observations, self.inertia,
             self.use_app_embed, self.weight_app_embed)
-        for m in matched:
-            #print(dets[m[0]])
-            self.trackers[m[1]].update(dets[m[0], :])
-            self.trackers[m[1]].update_emb(dets_emb[m[0]], self.app_embed_alpha)
+        try:
+            for m in matched:
+                #print(dets[m[0]])
+                self.trackers[m[1]].update(dets[m[0], :])
+                self.trackers[m[1]].update_emb(dets_emb[m[0]], self.app_embed_alpha)
+        except:
+            breakpoint()
+        
 
         """
             Second round of associaton by OCR
@@ -316,7 +323,7 @@ class OCSort(object):
             left_trks_emb = trk_emb[unmatched_trks]
             
             # TODO : maybe also use app_embed here?
-            dist_left = self.asso_func(left_dets, left_trks, self.dist_threshold)
+            dist_left = self.asso_func(left_dets, left_trks, self.dist_threshold, self.mse_tolerence)
             dist_left = np.array(dist_left)
             if dist_left.max() > 0:
                 rematched_indices = linear_assignment(-dist_left)
@@ -340,7 +347,7 @@ class OCSort(object):
         # BYTE association, close low score detections to unmatched tracks
         if self.use_byte and len(dets_second) > 0 and unmatched_trks.shape[0] > 0:
             u_trks = trks[unmatched_trks]
-            dist_left = self.asso_func(dets_second, u_trks, self.dist_threshold)          # iou between low score detections and unmatched tracks
+            dist_left = self.asso_func(dets_second, u_trks, self.dist_threshold, self.mse_tolerence)          # iou between low score detections and unmatched tracks
             dist_left = np.array(dist_left)
             
             if dist_left.max() > 0:

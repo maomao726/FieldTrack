@@ -5,7 +5,8 @@ FieldTrack/yolox.egg-info
 FieldTrack/external/reid/build
 FieldTrack/external/reid/torchreid.egg-info
 FieldTrack/external/weights
-
+FieldTrack/carla/
+FieldTrack/dists/
 football_field/football_field.egg-info
 football_field/football_field/best.pth
 motmetrics/motmetrics.egg-info

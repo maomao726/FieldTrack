@@ -24,7 +24,7 @@ class Exp(MyExp):
         self.max_epoch = 80
         self.print_interval = 20
         self.eval_interval = 5
-        self.test_conf = 0.001
+        self.test_conf = 0.01
         self.nmsthre = 0.7
         self.no_aug_epochs = 10
         self.basic_lr_per_img = 0.001 / 64.0

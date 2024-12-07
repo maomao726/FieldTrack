@@ -28,10 +28,10 @@ class RawVideoLabelParser():
         
         ## load keypoints labels
         
-        key_pt_path = os.path.join(raw_path, "keypoints")
-        if not os.path.exists(key_pt_path):
-            logger.warning("homography_matrix_2D_to_2D is not exist. Are you running \"gen_keypoints.py\"?")
-        else:
+        
+
+        try:
+            key_pt_path = os.path.join(raw_path, "keypoints")
             self.key_pt_dict = {}
             for dirpth, _, _ in os.walk(key_pt_path):
                 if dirpth == key_pt_path:
@@ -41,6 +41,8 @@ class RawVideoLabelParser():
             self.num_cam = len(self.key_pt_dict.keys())
             self.num_keypt = len(self.key_pt_dict['0']['0'])
             logger.info('[RawVideoLabelParser] : Keypoint is loaded. Total Length: %d. Num of ref_points: %d'%(self.num_cam, self.num_keypt))
+        except:
+            logger.warning("keypoints directory is not exist. Are you running \"gen_keypoints.py\"?")
         
         ## load homography matrix label
         homo_path = os.path.join(raw_path, "labels/homography_matrix_2D_to_2D.json")
@@ -52,6 +54,9 @@ class RawVideoLabelParser():
             self.homo_labels = json.load(homo_fp)
             logger.info('[RawVideoLabelParser] : homography matrix are loaded, Len : %d, Cam : %d, each length : %d' \
                 %(len(self.homo_labels), len(self.homo_labels['0']), len(self.homo_labels['0'])))
+
+        if "visible" in self.annotations["0"]:
+            logger.warning("Visible annotations are detected, will use these to select objects for metrics calculation")
         
         
 
@@ -62,7 +67,7 @@ class RawVideoLabelParser():
             description: 
                 projection matrix for each cam, global to local
             return:
-                ndarray, shape: 3x3x4
+                ndarray, shape: 3x4
         '''
         assert fidx < self.frame_length, "index %d is out of the bound, which is %d "%(fidx, self.frame_length)
         res = np.array(self.annotations[str(fidx)]['projection_matrix']["cam%d" % cidx], dtype=np.float32).reshape(3, 4)
@@ -111,11 +116,17 @@ class RawVideoLabelParser():
         # for i in range(players_pos_image.shape[0]):
         #     img = cv2.circle(img, (int(players_pos_image[i, 0]), int(players_pos_image[i, 1])), 5, (0, 0, 255), -1)
         # cv2.imwrite("debug.jpg", img)
+        
+        if "visible" in self.annotations[str(fidx)]:
+            is_in = np.array(self.annotations[str(fidx)]["visible"][str(cidx)])
+        else:
 
-        is_in = (0 <= players_pos_image[:, 0]) & \
-                (players_pos_image[:,0] < self.frame_size[0]) & \
-                (0 <= players_pos_image[:, 1]) & \
-                (players_pos_image[:, 1] < self.frame_size[1])
+            is_in = (0 <= players_pos_image[:, 0]) & \
+                    (players_pos_image[:,0] < self.frame_size[0]) & \
+                    (0 <= players_pos_image[:, 1]) & \
+                    (players_pos_image[:, 1] < self.frame_size[1])
+            
+        
 
         return players_pos_global[:, [1, 0]], is_in
     

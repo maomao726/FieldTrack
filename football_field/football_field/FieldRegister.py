@@ -27,7 +27,7 @@ class FieldRegister:
             img_grid = cv2.putText(img_grid, f"{i}", (int(y), int(x)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         cv2.imwrite("field_keypoints.jpg", img_grid)
 
-    def inference(self, frame, pred_result, exp_size):
+    def inference(self, frame, pred_result, exp_size = None):
         '''
         args:
         frame: input frame, np.ndarray, shape (H, W, 3)
@@ -46,42 +46,50 @@ class FieldRegister:
             "warpped" : warpped frame, np.ndarray, shape (field_height, field_width, 3)
         '''
         
-        
-        result = {}
-        result["heatmaps"] = field_inference(self.model, self.preprocessor, frame, self.device)
-        result["keypoints"], result["conf_score"] = field_postprocessing(result["heatmaps"])
-        result["homography"] = field_get_homography(result["keypoints"], self.field_keypoints)
+        try:
+            # breakpoint()
+            result = {}
+            result["heatmaps"] = field_inference(self.model, self.preprocessor, frame, self.device)
+            result["keypoints"], result["conf_score"] = field_postprocessing(result["heatmaps"])
+            result["homography"] = field_get_homography(result["keypoints"], self.field_keypoints)
 
-        warpped = cv2.transpose(frame)
-        warpped = cv2.warpPerspective(warpped, result["homography"], (self.field_size[0], self.field_size[1]))
-        warpped = cv2.transpose(warpped)
-        result["warpped"] = warpped
+            warpped = cv2.transpose(frame)
+            warpped = cv2.warpPerspective(warpped, result["homography"], (self.field_size[0], self.field_size[1]))
+            warpped = cv2.transpose(warpped)
+            result["warpped"] = warpped
 
-        proj_result = [None for _ in pred_result] if pred_result is not None else None
+            proj_result = [None for _ in pred_result] if pred_result is not None else None
 
-        #Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
-        if pred_result is not None:
-            # scale
-            detections = pred_result[0][:, :4]
-            img_h, img_w = frame.shape[:2]
-            #scale = torch.tensor([exp_size[0] / float(img_h), exp_size[1] / float(img_w)], dtype=torch.float32).to(self.device)
-            scale = min(exp_size[0] / float(img_h), exp_size[1] / float(img_w))
-            detections /= scale
-            bot_center = torch.stack([detections[:, 3], (detections[:, 0] + detections[:, 2]) / 2, torch.ones_like(detections[:, 0])], dim=1)
-            # for d in bot_center:
-            #     frame = cv2.circle(frame, (int(d[1]), int(d[0])), 5, (0, 255, 0), -1)
-            # cv2.imwrite("debug_ori.jpg", frame)
-            bot_center = bot_center @ torch.from_numpy(result["homography"]).float().to(self.device).t()
-            bot_center = bot_center[:, :2] / bot_center[:, 2:]
+            #Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
+            
+            if pred_result[0] is not None:
+                # scale
+                detections = pred_result[0][:, :4]
+                # img_h, img_w = frame.shape[:2]
+                #scale = torch.tensor([exp_size[0] / float(img_h), exp_size[1] / float(img_w)], dtype=torch.float32).to(self.device)
+                #scale = min(exp_size[0] / float(img_h), exp_size[1] / float(img_w))
+                #detections /= scale
+                bot_center = torch.stack([detections[:, 3], (detections[:, 0] + detections[:, 2]) / 2, torch.ones_like(detections[:, 0])], dim=1)
+                # for d in bot_center:
+                #     frame = cv2.circle(frame, (int(d[1]), int(d[0])), 5, (0, 255, 0), -1)
+                # cv2.imshow("debug_ori", frame)
+                bot_center = bot_center @ torch.from_numpy(result["homography"]).float().to(self.device).t()
+                bot_center = bot_center[:, :2] / bot_center[:, 2:]
 
-            # for i, detection in enumerate(bot_center):
-            #     warpped = cv2.circle(warpped, (int(detection[1]), int(detection[0])), 5, (0, 255, 0), -1)
-            # cv2.imwrite("debug.jpg", warpped)
-            bot_center = torch.cat([bot_center[:], pred_result[0][:, 4:]], dim=1)
-            proj_result[0] = bot_center
-            proj_result.append(detections)
+                # for i, detection in enumerate(bot_center):
+                #     warpped = cv2.circle(warpped, (int(detection[1]), int(detection[0])), 5, (0, 255, 0), -1)
+                # cv2.imshow("debug", warpped)
+                # cv2.waitKey(10)
+                bot_center = torch.cat([bot_center[:], pred_result[0][:, 4:]], dim=1)
+                proj_result[0] = bot_center
+                proj_result.append(detections)
 
-        return proj_result, result
+            #print(len(proj_result), proj_result[0].shape, proj_result[1].shape)
+
+            return proj_result, result
+        except Exception as e:
+            print(e)
+            breakpoint()
     
 
 class FieldRegister_AfterTrack:
@@ -131,16 +139,18 @@ class FieldRegister_AfterTrack:
         '''
         
         result = {}
+        # cv2.imshow("img", frame)
+        # cv2.waitKey(10)
         result["heatmaps"] = field_inference(self.model, self.preprocessor, frame, self.device)
         result["keypoints"], result["conf_score"] = field_postprocessing(result["heatmaps"])
         result["homography"] = field_get_homography(result["keypoints"], self.field_keypoints)
-
+        
         warpped = cv2.transpose(frame)
         warpped = cv2.warpPerspective(warpped, result["homography"], (self.field_size[0], self.field_size[1]))
         warpped = cv2.transpose(warpped)
         result["warpped"] = warpped
 
-        #Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
+        #Detections ordered as (x1, y1, x2, y2, id)
         pred_to_field = None
         if pred_result is not None:
             pred_to_field = [None for _ in pred_result]
@@ -153,16 +163,20 @@ class FieldRegister_AfterTrack:
             # detections /= scale
             bot_center = np.stack([detections[:, 3], (detections[:, 0] + detections[:, 2]) / 2, np.ones((detections.shape[0]))], axis=1)
 
-            # for d in bot_center:
-            #     frame = cv2.circle(frame, (int(d[1]), int(d[0])), 5, (0, 255, 0), -1)
+            # for i,d in enumerate(bot_center):
+            #     frame = cv2.circle(frame, (int(d[1]), int(d[0])), 5, (255, 0, 0), -1)
+            #     frame = cv2.putText(frame, str(pred_result[0][i, 4]), (int(d[1]), int(d[0])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
             # cv2.imwrite("debug_ori.jpg", frame)
             bot_center = bot_center @ result["homography"].T
             bot_center = bot_center[:, :2] / bot_center[:, 2:]
 
-            for i, detection in enumerate(bot_center):
-                warpped = cv2.circle(warpped, (int(detection[1]), int(detection[0])), 5, (0, 255, 0), -1)
-            cv2.imwrite("debug_ori.jpg", warpped)
-            cv2.waitKey(3)
+            
+            # for i, detection in enumerate(bot_center):
+                # warpped = cv2.circle(warpped, (int(detection[1]), int(detection[0])), 5, (0, 255, 0), -1)
+                # warpped = cv2.putText(warpped, str(pred_result[0][i, 4]), (int(detection[1]), int(detection[0])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+            # cv2.imshow("debug_ori", frame)
+            # cv2.waitKey(20)
 
             bot_center = np.concatenate([bot_center[:], pred_result[0][:, 4:]], axis=1)
             pred_to_field[0] = bot_center

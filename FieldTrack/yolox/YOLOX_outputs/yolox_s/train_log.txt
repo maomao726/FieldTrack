@@ -1,0 +1,114 @@
+2024-09-22 15:21:13.629 | INFO     | yolox.core.trainer:before_train:124 - args: Namespace(experiment_name='yolox_s', name=None, dist_backend='nccl', dist_url=None, batch_size=64, devices=None, local_rank=0, exp_file='exps/example/custom/yolox_s.py', resume=False, ckpt='./weights/yolox_s.pth', start_epoch=None, num_machines=1, machine_rank=0, fp16=True, occupy=True, opts=[])
+2024-09-22 15:21:13.630 | INFO     | yolox.core.trainer:before_train:125 - exp value:
+╒══════════════════╤═══════════════════════════════════╕
+│ keys             │ values                            │
+╞══════════════════╪═══════════════════════════════════╡
+│ seed             │ None                              │
+├──────────────────┼───────────────────────────────────┤
+│ output_dir       │ './YOLOX_outputs'                 │
+├──────────────────┼───────────────────────────────────┤
+│ print_interval   │ 10                                │
+├──────────────────┼───────────────────────────────────┤
+│ eval_interval    │ 1                                 │
+├──────────────────┼───────────────────────────────────┤
+│ num_classes      │ 71                                │
+├──────────────────┼───────────────────────────────────┤
+│ depth            │ 0.33                              │
+├──────────────────┼───────────────────────────────────┤
+│ width            │ 0.5                               │
+├──────────────────┼───────────────────────────────────┤
+│ data_num_workers │ 4                                 │
+├──────────────────┼───────────────────────────────────┤
+│ input_size       │ (640, 640)                        │
+├──────────────────┼───────────────────────────────────┤
+│ random_size      │ (14, 26)                          │
+├──────────────────┼───────────────────────────────────┤
+│ train_ann        │ 'instances_train2017.json'        │
+├──────────────────┼───────────────────────────────────┤
+│ val_ann          │ 'instances_val2017.json'          │
+├──────────────────┼───────────────────────────────────┤
+│ degrees          │ 10.0                              │
+├──────────────────┼───────────────────────────────────┤
+│ translate        │ 0.1                               │
+├──────────────────┼───────────────────────────────────┤
+│ scale            │ (0.1, 2)                          │
+├──────────────────┼───────────────────────────────────┤
+│ mscale           │ (0.8, 1.6)                        │
+├──────────────────┼───────────────────────────────────┤
+│ shear            │ 2.0                               │
+├──────────────────┼───────────────────────────────────┤
+│ perspective      │ 0.0                               │
+├──────────────────┼───────────────────────────────────┤
+│ enable_mixup     │ True                              │
+├──────────────────┼───────────────────────────────────┤
+│ warmup_epochs    │ 5                                 │
+├──────────────────┼───────────────────────────────────┤
+│ max_epoch        │ 300                               │
+├──────────────────┼───────────────────────────────────┤
+│ warmup_lr        │ 0                                 │
+├──────────────────┼───────────────────────────────────┤
+│ basic_lr_per_img │ 0.00015625                        │
+├──────────────────┼───────────────────────────────────┤
+│ scheduler        │ 'yoloxwarmcos'                    │
+├──────────────────┼───────────────────────────────────┤
+│ no_aug_epochs    │ 15                                │
+├──────────────────┼───────────────────────────────────┤
+│ min_lr_ratio     │ 0.05                              │
+├──────────────────┼───────────────────────────────────┤
+│ ema              │ True                              │
+├──────────────────┼───────────────────────────────────┤
+│ weight_decay     │ 0.0005                            │
+├──────────────────┼───────────────────────────────────┤
+│ momentum         │ 0.9                               │
+├──────────────────┼───────────────────────────────────┤
+│ exp_name         │ 'yolox_s'                         │
+├──────────────────┼───────────────────────────────────┤
+│ test_size        │ (640, 640)                        │
+├──────────────────┼───────────────────────────────────┤
+│ test_conf        │ 0.001                             │
+├──────────────────┼───────────────────────────────────┤
+│ nmsthre          │ 0.65                              │
+├──────────────────┼───────────────────────────────────┤
+│ data_dir         │ '/media/hcchen/data/data/coco128' │
+╘══════════════════╧═══════════════════════════════════╛
+2024-09-22 15:21:13.775 | INFO     | yolox.core.trainer:before_train:130 - Model Summary: Params: 8.96M, Gflops: 26.91
+2024-09-22 15:21:13.833 | INFO     | yolox.core.trainer:resume_train:289 - loading checkpoint for fine tuning
+2024-09-22 15:21:13.870 | WARNING  | yolox.utils.checkpoint:load_ckpt:25 - Shape of head.cls_preds.0.weight in checkpoint is torch.Size([80, 128, 1, 1]), while shape of head.cls_preds.0.weight in model is torch.Size([71, 128, 1, 1]).
+2024-09-22 15:21:13.870 | WARNING  | yolox.utils.checkpoint:load_ckpt:25 - Shape of head.cls_preds.0.bias in checkpoint is torch.Size([80]), while shape of head.cls_preds.0.bias in model is torch.Size([71]).
+2024-09-22 15:21:13.871 | WARNING  | yolox.utils.checkpoint:load_ckpt:25 - Shape of head.cls_preds.1.weight in checkpoint is torch.Size([80, 128, 1, 1]), while shape of head.cls_preds.1.weight in model is torch.Size([71, 128, 1, 1]).
+2024-09-22 15:21:13.871 | WARNING  | yolox.utils.checkpoint:load_ckpt:25 - Shape of head.cls_preds.1.bias in checkpoint is torch.Size([80]), while shape of head.cls_preds.1.bias in model is torch.Size([71]).
+2024-09-22 15:21:13.871 | WARNING  | yolox.utils.checkpoint:load_ckpt:25 - Shape of head.cls_preds.2.weight in checkpoint is torch.Size([80, 128, 1, 1]), while shape of head.cls_preds.2.weight in model is torch.Size([71, 128, 1, 1]).
+2024-09-22 15:21:13.871 | WARNING  | yolox.utils.checkpoint:load_ckpt:25 - Shape of head.cls_preds.2.bias in checkpoint is torch.Size([80]), while shape of head.cls_preds.2.bias in model is torch.Size([71]).
+2024-09-22 15:21:13.875 | ERROR    | yolox.core.launch:launch:90 - An error has been caught in function 'launch', process 'MainProcess' (209230), thread 'MainThread' (139169110803520):
+Traceback (most recent call last):
+
+  File "/mnt/12cf47fc-dac6-4abb-a06f-014c3d2e7d30/FieldTrack/FieldTrack/yolox/tools/train.py", line 114, in <module>
+    launch(
+    └ <function launch at 0x7e91dc6d0430>
+
+> File "/media/hcchen/data/FieldTrack/FieldTrack/yolox/core/launch.py", line 90, in launch
+    main_func(*args)
+    │          └ (╒══════════════════╤════════════════════════════════════════════════════════════════════════════════════════════════════════...
+    └ <function main at 0x7e91d9b3e4d0>
+
+  File "/mnt/12cf47fc-dac6-4abb-a06f-014c3d2e7d30/FieldTrack/FieldTrack/yolox/tools/train.py", line 100, in main
+    trainer.train()
+    │       └ <function Trainer.train at 0x7e91dd05c820>
+    └ <yolox.core.trainer.Trainer object at 0x7e91d9b1b0a0>
+
+  File "/media/hcchen/data/FieldTrack/FieldTrack/yolox/core/trainer.py", line 70, in train
+    self.before_train()
+    │    └ <function Trainer.before_train at 0x7e91d9cfd750>
+    └ <yolox.core.trainer.Trainer object at 0x7e91d9b1b0a0>
+
+  File "/media/hcchen/data/FieldTrack/FieldTrack/yolox/core/trainer.py", line 143, in before_train
+    self.train_loader = self.exp.get_data_loader(
+    │                   │    │   └ <function Exp.get_data_loader at 0x7e91d9b3e830>
+    │                   │    └ ╒══════════════════╤═════════════════════════════════════════════════════════════════════════════════════════════════════════...
+    │                   └ <yolox.core.trainer.Trainer object at 0x7e91d9b1b0a0>
+    └ <yolox.core.trainer.Trainer object at 0x7e91d9b1b0a0>
+
+  File "/media/hcchen/data/FieldTrack/FieldTrack/yolox/exp/yolox_base.py", line 82, in get_data_loader
+    from yolox.data import (
+
+ImportError: cannot import name 'COCODataset' from 'yolox.data' (/media/hcchen/data/FieldTrack/FieldTrack/yolox/data/__init__.py)

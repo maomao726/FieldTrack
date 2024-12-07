@@ -26,7 +26,7 @@ def get_search_space(method):
     if method == "eval_my":
         return {
             "track_thresh": {'_type': 'uniform', '_value': [0.1, 0.9]},
-            "dist_thresh": {'_type': 'uniform', '_value': [20, 50]},
+            "dist_thresh": {'_type': 'uniform', '_value': [80, 120]},
             #"mse_tolerance": {'_type': 'uniform', '_value': [0, 0.3]},
             "min_hits": {'_type': 'randint', '_value': [1, 5]},
             "inertia": {'_type': 'uniform', '_value': [0.1, 0.9]},

@@ -29,7 +29,7 @@ def field_inference(model, preprocessor, image, device):
     return output.squeeze(0)
 
 @torch.no_grad()
-def field_postprocessing(output, conf_threshold = 0.1):
+def field_postprocessing(output, conf_threshold = 0.01):
     '''
     filtering keypoints from pred
         pred : (C, H, W)
@@ -81,11 +81,13 @@ def field_get_homography(
     return : 
         np.ndarray : homography matrix
     '''
+    
     valid_pt_mask = pt_on_img[:, 0] >= 0
     pt_on_img = pt_on_img[valid_pt_mask]
     pt_on_field = pt_on_field[valid_pt_mask]
-
+    # print(pt_on_field, pt_on_img)
     H, _ = cv2.findHomography(pt_on_img, pt_on_field, cv2.RANSAC, 6.0)
+    # breakpoint()
     return H
 
 def football_data_labelParser(raw_datapath : str):

@@ -2,23 +2,24 @@
 
 ############################################
 paths=( 
-       "/media/hcchen/data/data/football_data/videoData/motions/slowest" 
-       "/media/hcchen/data/data/football_data/videoData/motions/slow" 
-       "/media/hcchen/data/data/football_data/videoData/motions/mediumslow"
-       "/media/hcchen/data/data/football_data/videoData/motions/mediumfast"
-       "/media/hcchen/data/data/football_data/videoData/motions/fast"
-       "/media/hcchen/data/data/football_data/videoData/motions/fastest"
-        # "/media/hcchen/data/data/football_data/videoData/cut2" 
+    #    "/media/hcchen/data/data/football_data/videoData/motions/slowest" 
+    #    "/media/hcchen/data/data/football_data/videoData/motions/slow" 
+    #    "/media/hcchen/data/data/football_data/videoData/motions/mediumslow"
+    #    "/media/hcchen/data/data/football_data/videoData/motions/mediumfast"
+    #    "/media/hcchen/data/data/football_data/videoData/motions/fast"
+    #    "/media/hcchen/data/data/football_data/videoData/motions/fastest"
+         "/media/hcchen/data/data/football_data/videoData/cut2" 
         # "/media/hcchen/data/data/football_data/videoData/nocut0" 
         # "/media/hcchen/data/data/football_data/videoData/nocut1"
         # "/media/hcchen/data/data/football_data/videoData/nocut2"
         )
 
-#raw_path="/media/hcchen/data/data/football_data/dataset_.98"
-raw_path="/media/hcchen/data/data/football_data/maincam_momentum"
+raw_path="/media/hcchen/data/data/football_data/dataset_.98"
+#raw_path="/media/hcchen/data/data/football_data/maincam_momentum"
+#raw_path="/media/hcchen/backup/DataCollection/CARLA_0.9.15/output_2"
 
 # Pretrained method
-method="Dance" # MOT17, MOT20, Dance
+method="MOT17" # MOT17, MOT20, Dance
 ############################################
 
 
